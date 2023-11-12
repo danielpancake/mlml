@@ -43,3 +43,15 @@ class Softmax(Layer):
     def backward(self, grad: np.ndarray) -> np.ndarray:
         exp, inv_sum, out = self.ctx
         return out * (grad - np.sum(grad * exp, keepdims=True) * inv_sum)
+
+
+class Flatten(Layer):
+    def __init__(self, in_shape: tuple):
+        super().__init__()
+        self.ctx = in_shape
+
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        return x.reshape(-1, 1)
+
+    def backward(self, grad: np.ndarray) -> np.ndarray:
+        return grad.reshape(self.ctx)
