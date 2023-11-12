@@ -30,3 +30,16 @@ class LayerWithParams(Layer):
             else:
                 warn(f"Parameter {k} has no gradient")
 
+
+class LossFunction:
+    def __init__(self):
+        self.ctx = None
+
+    def __call__(self, y_pred: np.ndarray, y_true: np.ndarray) -> np.ndarray:
+        return self.forward(y_pred, y_true)
+
+    def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> np.ndarray:
+        pass
+
+    def backward(self) -> np.ndarray:
+        pass
