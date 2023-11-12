@@ -9,17 +9,17 @@ else:
 class Linear(LayerWithParams):
     def __init__(self, in_dim: int, out_dim: int):
         super().__init__()
-        self.params["W"] = np.random.randn(in_dim, out_dim)
-        self.params["b"] = np.random.randn(1, out_dim)
+        self.params["W"] = np.random.randn(out_dim, in_dim) * np.sqrt(2 / in_dim)
+        self.params["b"] = np.zeros((out_dim, 1))
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         self.ctx = x
-        return np.matmul(x, self.params["W"]) + self.params["b"]
+        return np.matmul(self.params["W"], x) + self.params["b"]
 
     def backward(self, grad: np.ndarray) -> np.ndarray:
-        self.grads["W"] = np.matmul(self.ctx.T, grad)
-        self.grads["b"] = np.sum(grad, axis=0)
-        return np.matmul(grad, self.params["W"].T)
+        self.grads["W"] = np.matmul(grad, self.ctx.T)
+        self.grads["b"] = np.sum(grad, axis=1, keepdims=True)
+        return np.matmul(self.params["W"].T, grad)
 
 
 class ReLU(Layer):
@@ -32,18 +32,14 @@ class ReLU(Layer):
 
 
 class Softmax(Layer):
-    def __init__(self, axis: int = 1):
-        super().__init__()
-        # Commonly, axis is `len(x.shape) - 1` assuming batch is the first dimension
-        self.axis = axis
-
     def forward(self, x: np.ndarray) -> np.ndarray:
-        exp = np.exp(x - np.max(x, axis=self.axis, keepdims=True))
-        out = exp / np.sum(exp, axis=self.axis, keepdims=True)
+        exp = np.exp(x - np.max(x))
+        inv_sum = 1 / np.sum(exp, keepdims=True)
+        out = exp * inv_sum
 
-        self.ctx = out
+        self.ctx = (exp, inv_sum, out)
         return out
 
     def backward(self, grad: np.ndarray) -> np.ndarray:
-        s = self.ctx
-        return grad * s * (1 - s)
+        exp, inv_sum, out = self.ctx
+        return out * (grad - np.sum(grad * exp, keepdims=True) * inv_sum)
