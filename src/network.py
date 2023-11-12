@@ -69,11 +69,11 @@ class Network:
             x = x[shuffle_mask]
             y = y[shuffle_mask]
 
-        # Split into training and validation set
-        x_train, y_train, x_val, y_val = self.split_train_val(x, y, train_val_split)
-        x_train_size, x_val_size = x_train.shape[0], x_val.shape[0]
-
         for epoch in range(epochs):
+            # Split into training and validation set
+            x_train, y_train, x_val, y_val = self.split_train_val(x, y, train_val_split)
+            x_train_size, x_val_size = x_train.shape[0], x_val.shape[0]
+
             print(f"Epoch {epoch + 1}/{epochs}")
 
             train_losses = []
