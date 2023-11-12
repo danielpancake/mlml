@@ -1,5 +1,7 @@
 import numpy as np
 
+from warnings import warn
+
 
 class Layer:
     def __init__(self):
@@ -25,3 +27,6 @@ class LayerWithParams(Layer):
         for k in self.params:
             if k in self.grads:
                 self.params[k] -= lr * self.grads[k]
+            else:
+                warn(f"Parameter {k} has no gradient")
+
