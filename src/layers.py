@@ -33,6 +33,17 @@ class ReLU(Layer):
         return grad * self.ctx
 
 
+class Sigmoid(Layer):
+    def forward(self, x: np.ndarray) -> np.ndarray:
+        out = 1 / (1 + np.exp(-x))
+        self.ctx = out
+        return out
+
+    def backward(self, grad: np.ndarray) -> np.ndarray:
+        out = self.ctx
+        return grad * out * (1 - out)
+
+
 class Softmax(Layer):
     def forward(self, x: np.ndarray) -> np.ndarray:
         exp = np.exp(x - np.max(x))
