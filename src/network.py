@@ -9,13 +9,14 @@ else:
 
 
 class Network:
-    def __init__(self, layers: list, loss):
+    def __init__(self, layers: list, loss: LossFunction, metric: callable):
         self.layers = layers
         self.layers_trainable = [
             layer for layer in layers if isinstance(layer, LayerWithParams)
         ]
 
         self.loss = loss
+        self.metric = metric
 
     def forward(self, x: np.ndarray) -> np.ndarray:
         for layer in self.layers:
@@ -61,6 +62,8 @@ class Network:
         lr: float,
         epochs: int,
         train_val_split: float = 0.8,
+        val_x: np.ndarray = None,
+        val_y: np.ndarray = None,
         shuffle: bool = False,
     ):
         # Shuffle dataset
@@ -71,8 +74,16 @@ class Network:
 
         for epoch in range(epochs):
             # Split into training and validation set
-            x_train, y_train, x_val, y_val = self.split_train_val(x, y, train_val_split)
+            if val_x is not None and val_y is not None:
+                x_train, y_train = x, y
+                x_val, y_val = val_x, val_y
+            else:
+                x_train, y_train, x_val, y_val = self.split_train_val(
+                    x, y, train_val_split
+                )
             x_train_size, x_val_size = x_train.shape[0], x_val.shape[0]
+
+            update_interval = max(1, x_train_size // 100)
 
             print(f"Epoch {epoch + 1}/{epochs}")
 
@@ -83,22 +94,22 @@ class Network:
                 train_loss = self.train_step(x_train[i], y_train[i], lr)
                 train_losses.append(train_loss)
 
-                if i % 1000 == 0:
+                if i % update_interval == 0:
                     e_tqdm.set_postfix({"loss": np.mean(train_losses)})
 
             # Validation
             if x_val_size > 0:
                 print("Evaluating...", end=" ")
                 acc = self.evaluate(x_val, y_val)
-                print(f"Validation accuracy: {acc * 100:.2f}%")
+                print(f"Validation accuracy: {acc * 100}%")
 
             e_tqdm.close()
 
     def evaluate(self, x: np.ndarray, y: np.ndarray) -> float:
-        correct = 0
+        metric_vals = []
 
         for i in range(len(x)):
             out = self.forward(x[i])
-            correct += np.argmax(out) == np.argmax(y[i])
+            metric_vals.append(self.metric(out, y[i]))
 
-        return correct / len(x)
+        return np.mean(metric_vals)
