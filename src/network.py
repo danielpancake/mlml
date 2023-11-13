@@ -101,7 +101,7 @@ class Network:
             if x_val_size > 0:
                 print("Evaluating...", end=" ")
                 acc = self.evaluate(x_val, y_val)
-                print(f"Validation accuracy: {acc * 100}%")
+                print(f"Validation accuracy: {acc * 100:.5f}%")
 
             e_tqdm.close()
 
