@@ -20,3 +20,17 @@ class CrossEntropy(LossFunction):
     def backward(self) -> np.ndarray:
         y_pred, y_true = self.ctx
         return -y_true / (y_pred + self.eps)
+
+
+class SSE(LossFunction):
+    def forward(self, y_pred: np.ndarray, y_true: np.ndarray) -> np.ndarray:
+        assert (
+            y_pred.shape == y_true.shape
+        ), "y_pred and y_true must have the same shape"
+
+        self.ctx = (y_pred, y_true)
+        return np.sum((y_pred - y_true) ** 2)
+
+    def backward(self) -> np.ndarray:
+        y_pred, y_true = self.ctx
+        return 2 * (y_pred - y_true)
