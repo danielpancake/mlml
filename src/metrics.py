@@ -25,4 +25,5 @@ def jaccard_coefficient(bbox_a: np.ndarray, bbox_b: np.ndarray) -> float:
 
 
 def argmax_equal(x: np.ndarray, y: np.ndarray) -> bool:
+    assert x.shape == y.shape, "x and y must have the same shape"
     return np.argmax(x) == np.argmax(y)

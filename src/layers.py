@@ -87,7 +87,7 @@ class Conv2d(LayerWithParams):
 
         self.params["W"] = np.random.randn(
             num_filters, in_channels, kernel_size, kernel_size
-        ) * np.sqrt(2 / (in_channels * kernel_size**2))
+        ) * np.sqrt(2 / (in_channels * num_filters * kernel_size**2))
 
         self.in_channels = in_channels
         self.num_filters = num_filters
